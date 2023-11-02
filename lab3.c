@@ -29,13 +29,9 @@
 
 
 #define NIOS2_WRITE_STATUS(value)  (__builtin_wrctl (0, value))
-
 #define NIOS2_READ_IENABLE()	   (__builtin_rdctl (3))
-
 #define NIOS2_WRITE_IENABLE(value) (__builtin_wrctl (3, value))
-
 #define NIOS2_READ_IPENDING()	   (__builtin_rdctl (4))
-
 
 #endif /* _NIOS2_CONTROL_H_ */
 
@@ -51,16 +47,12 @@
 /* define pointer macros for accessing the timer interface registers */
 
 #define TIMER_STATUS	((volatile unsigned int *) 0x10002000)
-
 #define TIMER_CONTROL	((volatile unsigned int *) 0x10002004)
-
-#define TIMER_START_LO	((volatile unsigned int *) 0x10002008)
-
 #define TIMER_START_HI	((volatile unsigned int *) 0x1000200C)
-
+#define TIMER_START_LO	((volatile unsigned int *) 0x10002008)
+#define TIMER_SNAP_HI	((volatile unsigned int *) 0x10002014)
 #define TIMER_SNAP_LO	((volatile unsigned int *) 0x10002010)
 
-#define TIMER_SNAP_HI	((volatile unsigned int *) 0x10002014)
 
 /* bit pattern reflecting the position of the timeout(TO) bit 
 	in the timer status register */
@@ -79,7 +71,6 @@
 
 
 /* define pointer macro for accessing the LED interface data register */
-
 #define LEDS	((volatile unsigned int *) 0x10000010)
 
 #endif /* _LEDS_H_ */
@@ -90,11 +81,13 @@
 /*             start of application-specific code                  */
 /*-----------------------------------------------------------------*/
 
-/* place additional #define macros here */
+// defines for button registers
 #define BUTTON_DATA ((volatile unsigned int*) 0x10000050)
-
-/* define global program variables here */
-int flag;
+#define BUTTON_MASK ((volatile unsigned int*) 0x10000058)
+#define BUTTON_EDGE ((volatile unsigned int*) 0x1000005C)
+	
+// address of seven segment display
+#define SEVEN_SEG ((volatile unsigned int*) 0x10000020)
 
 // isr equivalent function
 void interrupt_handler(void){
@@ -103,10 +96,6 @@ void interrupt_handler(void){
 	
 	// rdctl r2, ipending
 	ipending = NIOS2_READ_IPENDING();
-
-	/* do one or more checks for different sources using ipending value */
-
-        /* remember to clear interrupt sources */
 	
 	// check for timer interrupt
 	if (ipending & 0x1){
@@ -116,8 +105,16 @@ void interrupt_handler(void){
 		
 		// toggle bit 0 of LEDs
 		*LEDS = *LEDS^0x1;
+	}
+	
+	// check for pushbutton interrupt
+	if (ipending & 0x2){
 		
-		flag = 1;
+		// clear PB interrupt register
+		*BUTTON_EDGE = 0x6;
+		
+		// toggle seven segment display
+		*SEVEN_SEG = *SEVEN_SEG^0xFFFFFFFF;
 	}
 	
 }
@@ -125,51 +122,28 @@ void interrupt_handler(void){
 // initial setup function
 void Init (void)
 {
-	/* initialize software variables */
-	flag = 0;
-	
-	/* set up each hardware interface */
-	
 	// STORE TIMER HI AND LO VALUES INTO MEM0RY
 	*TIMER_START_HI = 25000000 >> 16;
 	*TIMER_START_LO = 25000000 & 0xFFFF;
+	*TIMER_STATUS = TIMER_TO_BIT;
 	*TIMER_CONTROL = 0x7;
 	
-	// CLEAR EXTRANEOUS INTERRUPT
-	*TIMER_STATUS = TIMER_TO_BIT;
-	
-	
 	/* set up ienable */
-	
-	// WRITE VALUE IN IENABLE TO "ienable" REGISTER
+	// WRITE VALUE to IENABLE REGISTER
 	NIOS2_WRITE_IENABLE(0x3);
 	
 	/* enable global recognition of interrupts in procr. status reg. */
 	NIOS2_WRITE_STATUS(0x1);
-	
 }
 
 
-/* place additional functions here */
-
-
-int main (void)
-{
+int main (void){
 	
 	Init();	//perform initialization
 	
 	//main loop of program
-	while (1)
-	{
-		if(flag != 0){
-			
-			flag = 0;
-			
-			
-			
-		}
-		
-		
+	while (1){
+		// empty since all functionality comes from interrupt handling
 	}
 
 	return 0;	/* never reached, but main() must return a value */
