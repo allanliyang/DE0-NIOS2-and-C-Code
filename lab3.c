@@ -91,10 +91,10 @@
 /*-----------------------------------------------------------------*/
 
 /* place additional #define macros here */
-
+#define BUTTON_DATA ((volatile unsigned int*) 0x10000050)
 
 /* define global program variables here */
-
+int flag;
 
 void interrupt_handler(void)
 {
@@ -108,30 +108,31 @@ void interrupt_handler(void)
         /* remember to clear interrupt sources */
 }
 
+// initial setup function
 void Init (void)
 {
 	/* initialize software variables */
-	
+	flag = 0;
 	
 	/* set up each hardware interface */
 	
 	// STORE TIMER HI AND LO VALUES INTO MEM0RY
 	*TIMER_START_HI = 25000000 >> 16;
 	*TIMER_START_LO = 25000000 & 0xFFFF;
-	*TIMER_CONTROL = 0x4;
+	*TIMER_CONTROL = 0x7;
 	
-	// STORE CORRECT VALUE INTO IENABLE FOR PB AND TIMER
-	
+	// CLEAR EXTRANEOUS INTERRUPT
+	*TIMER_STATUS = TIMER_TO_BIT;
 	
 	
 	/* set up ienable */
 	
 	// WRITE VALUE IN IENABLE TO "ienable" REGISTER
-	NIO2_WRITE_IENABLE(0x3);
+	NIOS2_WRITE_IENABLE(0x3);
 	
-	
-
 	/* enable global recognition of interrupts in procr. status reg. */
+	NIOS2_WRITE_STATUS(0x1);
+	
 }
 
 
@@ -140,11 +141,15 @@ void Init (void)
 
 int main (void)
 {
-	Init ();	/* perform software/hardware initialization */
-
+	
+	Init();	//perform initialization
+	
+	//main loop of program
 	while (1)
 	{
-		/* fill in body of infinite loop */
+		
+		
+		
 	}
 
 	return 0;	/* never reached, but main() must return a value */
@@ -157,8 +162,6 @@ int main (void)
 
 
 /*-----------------------------------------------------------------*/
-
-
 /* 
    exception_handler.c
 
