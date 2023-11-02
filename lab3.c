@@ -96,16 +96,30 @@
 /* define global program variables here */
 int flag;
 
-void interrupt_handler(void)
-{
+// isr equivalent function
+void interrupt_handler(void){
+	
 	unsigned int ipending;
-
-
-	/* read current value in ipending register */
+	
+	// rdctl r2, ipending
+	ipending = NIOS2_READ_IPENDING();
 
 	/* do one or more checks for different sources using ipending value */
 
         /* remember to clear interrupt sources */
+	
+	// check for timer interrupt
+	if (ipending & 0x1){
+		
+		// clear timer interrupt
+		*TIMER_STATUS = 0;
+		
+		// toggle bit 0 of LEDs
+		*LEDS = *LEDS^0x1;
+		
+		flag = 1;
+	}
+	
 }
 
 // initial setup function
@@ -147,7 +161,13 @@ int main (void)
 	//main loop of program
 	while (1)
 	{
-		
+		if(flag != 0){
+			
+			flag = 0;
+			
+			
+			
+		}
 		
 		
 	}
