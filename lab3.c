@@ -15,13 +15,14 @@
    	functions can be added as necessary in front of main().
 
 ==================================================================*/
+
 /*-----------------------------------------------------------------*/
 /*  Not all of the possible control-register accesses are covered by
    	the macros below. The ones most relevant for ELEC 371 laboratory work
    	are included. If access to the other control registers is required,
    	additional macros could easily be introduced, based on the existing ones.
 */
-
+// nio2_control.h
 // SPECIAL INSTRUCTIONS TO WRITE TO CONTROL REGISTERS
 #ifndef _NIOS2_CONTROL_H_
 #define _NIOS2_CONTROL_H_
@@ -37,9 +38,12 @@
 
 
 #endif /* _NIOS2_CONTROL_H_ */
+
 	
 /*-----------------------------------------------------------------*/
-
+// timer.h
+// equivalent implementation of the timer header
+	
 #ifndef _TIMER_H_
 #define _TIMER_H_
 
@@ -58,20 +62,18 @@
 
 #define TIMER_SNAP_HI	((volatile unsigned int *) 0x10002014)
 
-
-/* define a bit pattern reflecting the position of the timeout (TO) bit
-   in the timer status register */
+/* bit pattern reflecting the position of the timeout(TO) bit 
+	in the timer status register */
 
 #define TIMER_TO_BIT 0x1
-
 
 #endif /* _TIMER_H_ */
 
 
-
-
 /*-----------------------------------------------------------------*/
-
+// LEDS header
+// equivalent implementation of the LEDs header
+	
 #ifndef _LEDS_H_
 #define _LEDS_H_
 
@@ -80,13 +82,9 @@
 
 #define LEDS	((volatile unsigned int *) 0x10000010)
 
-
 #endif /* _LEDS_H_ */
 
-
-
-
-
+	
 
 /*-----------------------------------------------------------------*/
 /*             start of application-specific code                  */
